@@ -6,14 +6,7 @@ const weapAddress = '0x7e091b0a220356b157131c831258a9c98ac8031a';
 const oracleAddress = '0x1cbfa0ec28da66896946474b2a93856eb725fbba';
 const defaultAddress = '0x0000000000000000000000000000000000000000';
 
-let NODE = 'https://bsc-dataseed1.defibit.io/'
-if (localStorage.getItem('node')){
-    NODE = localStorage.getItem('node')
-}
-
-const web3 = new Web3(NODE);
-
-// CONTRACTS
+const web3 = new Web3('https://bsc-dataseed1.defibit.io/');
 
 const conStakingReward = new web3.eth.Contract(IStakingRewards, stakingRewardAddress);
 const conStakingToken = new web3.eth.Contract(IERC20, conStakingTokenAddress);
@@ -24,6 +17,10 @@ const conOracle = new web3.eth.Contract(BasicPriceOracle, oracleAddress);
 
 const isAddress = address => web3.utils.isAddress(address);
 const getBNBBalance = address => web3.eth.getBalance(address);
+const fromEther = (value) => web3.utils.fromWei(BigInt(value).toString(), 'ether');
+
+const getRewardsPoolBalance = () => conStakingToken.methods.balanceOf(mainAddress).call({ from: defaultAddress });
+const getStakingPoolBalance = () => conStakingToken.methods.balanceOf(stakingRewardAddress).call({ from: defaultAddress });
 
 const getStakedBalance = address => conStakingToken.methods.balanceOf(address).call({ from: defaultAddress });
 const getStakedRewards = address => conStakingReward.methods.balanceOf(address).call({ from: defaultAddress });
@@ -44,7 +41,7 @@ const fetchFightGasOffset = async () => conCryptoBlades.methods.fightRewardGasOf
 const fetchFightBaseline = async () => conCryptoBlades.methods.fightRewardBaseline().call({ from: defaultAddress });
 const usdToSkill = async value => conCryptoBlades.methods.usdToSkill(value).call({ from: defaultAddress });
 const decodeAbi = (types, data) => web3.eth.abi.decodeParameters(types, data);
-const getPasLogs = options => web3.eth.abi.getPasLogs(options);
+const getPastLogs = options => web3.eth.getPastLogs(options);
 const getLatestBlock = async () =>  web3.eth.getBlock('latest')
 const getPastEvents = async (event, fromBlock, toBlock, address, topics) =>  conCryptoBlades.getPastEvents(event, {fromBlock, toBlock, address, topics})
 const getTransaction = async hash => web3.eth.getTransaction(hash)
