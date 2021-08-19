@@ -2,7 +2,7 @@ var accounts = localStorage.getItem('accounts')
 var names = localStorage.getItem('names')
 var hideAddress = (localStorage.getItem('hideAddress') === 'true')
 var currCurrency = localStorage.getItem('currency')
-var currencies = ['php', 'aed', 'ars', 'aud', 'brl', 'cny', 'eur', 'gbp', 'hkd', 'idr', 'jpy', 'myr', 'sgd', 'thb', 'twd', 'usd', 'ves', 'vnd']
+var currencies = ['php', 'aed', 'ars', 'aud', 'brl', 'cny', 'eur', 'gbp', 'hkd', 'idr', 'inr', 'jpy', 'myr', 'sgd', 'thb', 'twd', 'usd', 'ves', 'vnd']
 var includeClaimTax = (localStorage.getItem('includeClaimTax') === 'true')
 var rewardsClaimTaxMax = 0;
 var storeAccounts = []
@@ -203,15 +203,15 @@ async function loadData () {
         const skillTotal = sumOfArray([unclaimed, staked, wallet])
         rowHtml += ` <tr class="text-white align-middle" data-row="${address}">
                             <td rowspan="${charLen}" class='align-middle' data-id="${address}">${storeNames[address]}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${addressPrivacy(address)}</td>
+                            <td rowspan="${charLen}" class='align-middle address-column'>${address}</td>
                             ${charHtml}
-                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(ingame))}<br />${(Number(ingame) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(ingame))))})</span>` : '')}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(unclaimed))}<br />${(Number(unclaimed) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(unclaimed))))})</span>` : '')}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(staked))}<br />${(Number(staked) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(staked))))})</span>` : '')}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(wallet))}<br />${(Number(wallet) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(wallet))))})</span>` : '')}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(skillTotal))}<br />${(Number(skillTotal) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(skillTotal))))})</span>` : '')}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${(timeLeft > 0 ? unstakeSkillAt(timeLeft) : (Number(staked) > 0 ? '<span class="text-gold">Claim now</span>' : ''))}</td>
-                            <td rowspan="${charLen}" class='align-middle'>${bnbFormatter(formatNumber(fromEther(binance)))}<br />${(Number(binance) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertBnbToFiat(Number(fromEther(binance))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(ingame))}<br />${(Number(parseFloat(fromEther(ingame)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(ingame))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(unclaimed))}<br />${(Number(parseFloat(fromEther(unclaimed)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(unclaimed))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(staked))}<br />${(Number(parseFloat(fromEther(staked)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(staked))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(wallet))}<br />${(Number(parseFloat(fromEther(wallet)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(wallet))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${formatNumber(fromEther(skillTotal))}<br />${(Number(parseFloat(fromEther(skillTotal)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertToFiat(Number(fromEther(skillTotal))))})</span>` : '')}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${(timeLeft > 0 ? unstakeSkillAt(timeLeft) : (Number(parseFloat(fromEther(staked)).toFixed(6)) > 0 ? '<span class="text-gold">Claim now</span>' : ''))}</td>
+                            <td rowspan="${charLen}" class='align-middle'>${bnbFormatter(formatNumber(fromEther(binance)))}<br />${(Number(parseFloat(fromEther(binance)).toFixed(6)) > 0 ? `<span style="font-size: 10px;">(${toLocaleCurrency(convertBnbToFiat(Number(fromEther(binance))))})</span>` : '')}</td>
                             <td rowspan="${charLen}" class='align-middle'><button type="button" class="btn btn-success btn-sm mb-1" onclick="rename('${address}')">Rename</button><br>
                             <button type="button" class="btn btn-warning btn-sm mb-1" onclick="simulate('${address}')">Combat Simulator</button><br>
                             <button type="button" class="btn btn-danger btn-sm" onclick="remove('${address}')">Remove</button></td>
@@ -235,6 +235,7 @@ async function loadData () {
         return rowHtml
     }))
     $table.html(fRowHtml)    
+    toggleHelper(hideAddress)
     $('.btn-refresh').removeAttr('disabled')
 }
 
@@ -315,11 +316,11 @@ function charFormatter(val) {
 
 function elemToColor(elem) {
     switch (elem) {
-        case 'Fire': return `<span style='color: red'>${elem}</span>`
-        case 'Earth': return `<span style='color: green'>${elem}</span>`
-        case 'Lightning': return `<span style='color: yellow'>${elem}</span>`
-        case 'Water': return `<span style='color: cyan'>${elem}</span>`
-        default: return `<span style='color: red'>${elem}</span>`
+        case 'Fire': return '<img class="me-2" src="/img/fire.png" alt="Fire" width="20">'
+        case 'Earth': return '<img class="me-2" src="/img/earth.png" alt="Earth" width="20">'
+        case 'Lightning': return '<img class="me-2" src="/img/lightning.png" alt="Lightning" width="20">'
+        case 'Water': return '<img class="me-2" src="/img/water.png" alt="Water" width="20">'
+        default: return `<span style='color: red'>N/A</span>`
     }
 }
 
@@ -381,10 +382,10 @@ function nameFormatter(val) {
     return storeNames[val]
 }
 
-function privacyFormatter(val) {
+/* function privacyFormatter(val) {
     if (hideAddress) return addressPrivacy(val)
     return val
-}
+} */
 
 function convertSkill(value) {
     return (parseFloat(value) > 0 ? `${formatNumber(value)}<br><span class="fs-md">(${(parseFloat(value) * parseFloat(skillPrice)).toLocaleString('en-US', { style: 'currency', currency: currCurrency.toUpperCase() })})</span>` : 0)
@@ -399,11 +400,13 @@ function convertClaimTax(value) {
 }
 
 function remove(address) {
-    storeAccounts.splice(storeAccounts.indexOf(address), 1)
-    delete storeNames[address]
-    if (storeAccounts) localStorage.setItem('accounts', JSON.stringify(storeAccounts))
-    if (storeNames) localStorage.setItem('names', JSON.stringify(storeNames))
-    refresh()
+    if (confirm(`Are you sure you want to remove ${storeNames[address]}?`)){
+        storeAccounts.splice(storeAccounts.indexOf(address), 1)
+        delete storeNames[address]
+        if (storeAccounts) localStorage.setItem('accounts', JSON.stringify(storeAccounts))
+        if (storeNames) localStorage.setItem('names', JSON.stringify(storeNames))
+        refresh()
+    }
 }
 
 async function simulate(address) {
@@ -495,10 +498,10 @@ function rename(address) {
     })
 }
 
-function addressPrivacy(address) {
+/* function addressPrivacy(address) {
     if (hideAddress) return `${address.substr(0, 6)}...${address.substr(-4, 4)}`
     return address
-}
+} */
 
 function export_data() {
     getLocalstorageToFile(`CBTracker-${new Date().getTime()}.json`)
@@ -565,9 +568,11 @@ function toggleHelper(hide) {
     if (hide) {
         $('.toggle.btn.btn-sm').removeClass('btn-primary')
         $('.toggle.btn.btn-sm').addClass('btn-danger off')
+        $('.address-column').hide()
     } else {
         $('.toggle.btn.btn-sm').addClass('btn-primary')
         $('.toggle.btn.btn-sm').removeClass('btn-danger off')
+        $('.address-column').show()
     }
 }
 
@@ -629,7 +634,9 @@ function unstakeSkillAt(timeLeft){
 $('#btn-privacy').on('change', (e) => {
     hideAddress = e.currentTarget.checked
     localStorage.setItem('hideAddress', hideAddress)
-    refresh()
+    if (hideAddress) $('.address-column').hide()
+    else $('.address-column').show()
+    //refresh()
 })
 
 $("#btn-tax").on('change', (e) => {

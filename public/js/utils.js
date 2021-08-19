@@ -137,6 +137,7 @@ function weaponFromContract(id, data) {
         fourStarBurnPoints,
         fiveStarBurnPoints,
         bonusPower,
+        traitNum
     };
 }
 
@@ -306,4 +307,9 @@ function sumOfArray(arr) {
 function truncateToDecimals(num, dec = 2) {
     const calcDec = Math.pow(10, dec);
     return Math.trunc(num * calcDec) / calcDec;
+}
+
+function toFixed(num, fixed) {
+	const re = new RegExp('^-?\\d+(?:.\\d{0,' + (fixed || -1) + '})?');
+	return num.toString().match(re)[0];
 }
